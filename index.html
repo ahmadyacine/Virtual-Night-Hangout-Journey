@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Night Hangout Journey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0a0a1a;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle var(--duration) infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .car-container {
+      perspective: 1000px;
+    }
+
+    .road {
+      background: repeating-linear-gradient(to bottom,
+          #333 0px,
+          #333 20px,
+          #fff 20px,
+          #fff 40px);
+      background-size: 100% 40px;
+      animation: roadMove 2s linear infinite;
+    }
+
+    @keyframes roadMove {
+      0% {
+        background-position: 0 0;
+      }
+
+      100% {
+        background-position: 0 40px;
+      }
+    }
+
+    .message-bubble {
+      animation: floatUp 6s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+
+      10% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      90% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100px);
+        opacity: 0;
+      }
+    }
+
+    .stall:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(255, 215, 0, 0.3);
+    }
+
+    .stall-item {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .stall-item:hover {
+      transform: scale(1.1);
+    }
+
+    .journey-road {
+      height: 80px;
+      position: relative;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .journey-road::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(to right,
+          #333 0px,
+          #333 20px,
+          #fff 20px,
+          #fff 40px);
+      background-size: 40px 100%;
+      animation: roadMoveHorizontal 3s linear infinite;
+    }
+
+    @keyframes roadMoveHorizontal {
+      0% {
+        background-position: 0 0;
+      }
+
+      100% {
+        background-position: 40px 0;
+      }
+    }
+
+    .journey-marker {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #4f46e5;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.7);
+      z-index: 10;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #6b46c1, #4c51bf);
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 80%;
+      text-align: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100px;
+      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%234f46e5" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%234f46e5" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%234f46e5"/></svg>');
+      background-size: cover;
+      animation: wave 10s linear infinite;
+    }
+
+    @keyframes wave {
+      0% {
+        background-position-x: 0;
+      }
+
+      100% {
+        background-position-x: 1200px;
+      }
+    }
+
+    .palm-tree {
+      position: absolute;
+      bottom: 100px;
+      width: 60px;
+      height: 150px;
+    }
+
+    .palm-tree .trunk {
+      position: absolute;
+      bottom: 0;
+      left: 25px;
+      width: 10px;
+      height: 100px;
+      background: linear-gradient(to right, #8B4513, #A0522D);
+    }
+
+    .palm-tree .leaves {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      width: 60px;
+      height: 70px;
+      background: radial-gradient(ellipse at center, #228B22, #006400);
+      border-radius: 30px 30px 0 0;
+      transform-origin: bottom center;
+      animation: sway 4s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+
+      0%,
+      100% {
+        transform: rotate(-5deg);
+      }
+
+      50% {
+        transform: rotate(5deg);
+      }
+    }
+
+    .starfish {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(ellipse at center, #FF6347, #CD5C5C);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- Starry Night Background -->
+  <div id="stars" class="fixed inset-0 z-0"></div>
+
+  <!-- Main Content -->
+  <main class="flex-grow container mx-auto px-4 py-8 z-10 relative">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-purple-300 mb-2">Virtual Night Hangout Journey</h1>
+      <p class="text-xl text-blue-200">Our adventure under the stars, despite the distance</p>
+    </header>
+
+    <!-- Journey Road -->
+    <div class="journey-road">
+      <div class="journey-marker" style="left: 10%;">Start</div>
+    </div>
+
+    <!-- Lo-fi Music Section -->
+    <section class="mb-12 bg-gray-900 bg-opacity-70 rounded-xl p-6 backdrop-blur-sm">
+      <h2 class="text-2xl font-semibold text-pink-300 mb-4">🌌 Lo-fi Vibes Station</h2>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe width="100%" height="400" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=0"
+          title="YouTube video player" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen class="rounded-lg"></iframe>
+      </div>
+      <p class="mt-4 text-blue-200 text-center">Let's start our journey with some relaxing tunes...</p>
+    </section>
+
+    <!-- Journey Road -->
+    <div class="journey-road">
+      <div class="journey-marker" style="left: 30%;">On the way</div>
+    </div>
+
+    <!-- Night Drive Section -->
+    <section class="mb-12 bg-gray-900 bg-opacity-70 rounded-xl p-6 backdrop-blur-sm">
+      <h2 class="text-2xl font-semibold text-blue-300 mb-4">🚗 Night Drive Adventure</h2>
+      <div class="car-container relative h-64 overflow-hidden rounded-lg">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-900 to-black"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-1/3 road"></div>
+
+        <!-- Moon -->
+        <div class="absolute top-8 right-8 w-16 h-16 bg-yellow-100 rounded-full shadow-lg shadow-yellow-200"></div>
+
+        <!-- Car -->
+        <div class="absolute bottom-16 left-1/2 transform -translate-x-1/2">
+          <div class="relative">
+            <div class="w-40 h-20 bg-red-500 rounded-t-lg"></div>
+            <div class="w-48 h-8 bg-red-600 rounded-b-lg"></div>
+            <div class="absolute top-4 left-2 w-16 h-12 bg-blue-300 rounded-sm opacity-70"></div>
+            <div class="absolute top-4 right-2 w-16 h-12 bg-blue-300 rounded-sm opacity-70"></div>
+            <div class="absolute -bottom-2 left-4 w-8 h-4 bg-gray-800 rounded-full"></div>
+            <div class="absolute -bottom-2 right-4 w-8 h-4 bg-gray-800 rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Headlights -->
+        <div class="absolute bottom-16 left-1/2 transform -translate-x-1/2">
+          <div class="absolute -bottom-4 left-6 w-16 h-4 bg-yellow-200 rounded-full blur-sm opacity-80"></div>
+          <div class="absolute -bottom-4 right-6 w-16 h-4 bg-yellow-200 rounded-full blur-sm opacity-80"></div>
+        </div>
+
+        <!-- Messages -->
+        <div id="message-container" class="absolute top-0 left-0 right-0 h-full overflow-hidden">
+          <!-- Messages will be added here by JavaScript -->
+        </div>
+      </div>
+      <div class="mt-4 flex justify-center">
+        <button id="send-message-btn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+          Send a Message
+        </button>
+      </div>
+      <p class="mt-4 text-blue-200 text-center">Cruising through the night, sharing thoughts along the way...</p>
+    </section>
+
+    <!-- Journey Road -->
+    <div class="journey-road">
+      <div class="journey-marker" style="left: 50%;">Halfway there</div>
+    </div>
+
+    <!-- Night Market Section -->
+    <section class="mb-12 bg-gray-900 bg-opacity-70 rounded-xl p-6 backdrop-blur-sm">
+      <h2 class="text-2xl font-semibold text-yellow-300 mb-6">🎪 Night Market Stop</h2>
+      <p class="text-center text-blue-200 mb-6">Let's explore the market and find some sweet treats!</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Candy Stall -->
+        <div class="stall bg-gradient-to-br from-pink-900 to-purple-900 p-6 rounded-xl transition-all duration-300">
+          <h3 class="text-xl font-medium text-pink-200 mb-4">Sweet Treats</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="stall-item flex flex-col items-center" data-message="This lollipop is as sweet as your smile!">
+              <div class="w-16 h-16 bg-red-400 rounded-full mb-2"></div>
+              <span class="text-sm">Lollipop</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Caramel reminds me of our golden memories together">
+              <div class="w-16 h-16 bg-yellow-300 rounded-lg mb-2"></div>
+              <span class="text-sm">Caramel</span>
+            </div>
+            <div class="stall-item flex flex-col items-center" data-message="Minty fresh, just like our friendship">
+              <div class="w-16 h-16 bg-green-300 rounded-lg mb-2"></div>
+              <span class="text-sm">Mint</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Cotton candy - light and sweet, just like our chats">
+              <div class="w-16 h-16 bg-blue-300 rounded-full mb-2"></div>
+              <span class="text-sm">Cotton Candy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drink Stall -->
+        <div class="stall bg-gradient-to-br from-blue-900 to-teal-900 p-6 rounded-xl transition-all duration-300">
+          <h3 class="text-xl font-medium text-blue-200 mb-4">Bubble Tea</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="stall-item flex flex-col items-center"
+              data-message="Brown sugar - rich and comforting, like our friendship">
+              <div class="w-16 h-16 bg-amber-800 rounded-full mb-2"></div>
+              <span class="text-sm">Brown Sugar</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Strawberry sweetness for someone as lovely as you">
+              <div class="w-16 h-16 bg-pink-200 rounded-full mb-2"></div>
+              <span class="text-sm">Strawberry</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Matcha - unique and special, just like you">
+              <div class="w-16 h-16 bg-green-200 rounded-full mb-2"></div>
+              <span class="text-sm">Matcha</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Mango - tropical vibes for our virtual getaway">
+              <div class="w-16 h-16 bg-yellow-100 rounded-full mb-2"></div>
+              <span class="text-sm">Mango</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dessert Stall -->
+        <div class="stall bg-gradient-to-br from-amber-900 to-yellow-900 p-6 rounded-xl transition-all duration-300">
+          <h3 class="text-xl font-medium text-yellow-200 mb-4">Desserts</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="stall-item flex flex-col items-center"
+              data-message="Mochi - soft on the outside with a sweet center, like you">
+              <div class="w-16 h-16 bg-white rounded-lg mb-2"></div>
+              <span class="text-sm">Mochi</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Ube cake - exotic and wonderful, just like our friendship">
+              <div class="w-16 h-16 bg-purple-200 rounded-lg mb-2"></div>
+              <span class="text-sm">Ube Cake</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Red velvet - luxurious and special, for someone special">
+              <div class="w-16 h-16 bg-red-300 rounded-lg mb-2"></div>
+              <span class="text-sm">Red Velvet</span>
+            </div>
+            <div class="stall-item flex flex-col items-center"
+              data-message="Chocolate - because everything's better with you">
+              <div class="w-16 h-16 bg-amber-700 rounded-lg mb-2"></div>
+              <span class="text-sm">Chocolate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mt-6 text-blue-200 text-center">Click on any treat to share a sweet thought...</p>
+    </section>
+
+    <!-- Journey Road -->
+    <div class="journey-road">
+      <div class="journey-marker" style="left: 70%;">Almost there</div>
+    </div>
+
+    <!-- Beach Section -->
+    <section class="mb-12 bg-gray-900 bg-opacity-70 rounded-xl p-6 backdrop-blur-sm relative overflow-hidden"
+      style="min-height: 400px;">
+      <h2 class="text-2xl font-semibold text-teal-300 mb-6 relative z-10">🌊 Midnight Beach Stop</h2>
+      <p class="text-center text-blue-200 mb-6 relative z-10">Let's relax by the ocean under the stars...</p>
+
+      <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="bg-black bg-opacity-30 p-6 rounded-lg mb-4">
+            <h3 class="text-xl font-medium text-teal-200 mb-2">Beach Activities</h3>
+            <ul class="space-y-2">
+              <li class="flex items-center">
+                <span class="w-6 h-6 bg-yellow-400 rounded-full mr-2"></span>
+                <span>Build a sandcastle together</span>
+              </li>
+              <li class="flex items-center">
+                <span class="w-6 h-6 bg-yellow-400 rounded-full mr-2"></span>
+                <span>Look for shooting stars</span>
+              </li>
+              <li class="flex items-center">
+                <span class="w-6 h-6 bg-yellow-400 rounded-full mr-2"></span>
+                <span>Write messages in the sand</span>
+              </li>
+              <li class="flex items-center">
+                <span class="w-6 h-6 bg-yellow-400 rounded-full mr-2"></span>
+                <span>Listen to the waves</span>
+              </li>
+            </ul>
+          </div>
+          <button id="write-sand-btn" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg transition w-full">
+            Write in the Sand
+          </button>
+        </div>
+        <div class="relative h-64">
+          <!-- Beach scene -->
+          <div class="absolute bottom-0 left-0 right-0 h-32 bg-yellow-700 rounded-t-lg"></div>
+          <div class="absolute bottom-32 left-0 right-0 h-8 bg-yellow-600"></div>
+
+          <!-- Palm trees -->
+          <div class="palm-tree" style="left: 20%;">
+            <div class="trunk"></div>
+            <div class="leaves"></div>
+          </div>
+          <div class="palm-tree" style="left: 70%;">
+            <div class="trunk"></div>
+            <div class="leaves"></div>
+          </div>
+
+          <!-- Starfish -->
+          <div class="starfish" style="bottom: 40px; left: 30%;"></div>
+          <div class="starfish" style="bottom: 50px; left: 60%; animation-delay: 0.5s;"></div>
+
+          <!-- Sand message (will be added by JS) -->
+          <div id="sand-message"
+            class="absolute bottom-40 left-0 right-0 text-center text-white font-bold text-xl opacity-0 transition-opacity duration-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Ocean waves -->
+      <div class="wave"></div>
+      <p class="mt-6 text-blue-200 text-center relative z-10">The perfect spot to end our night together...</p>
+    </section>
+
+    <!-- Journey Road -->
+    <div class="journey-road">
+      <div class="journey-marker" style="left: 90%;">Final stop</div>
+    </div>
+
+    <!-- Chat Section -->
+    <section class="bg-gray-900 bg-opacity-70 rounded-xl p-6 backdrop-blur-sm">
+      <h2 class="text-2xl font-semibold text-green-300 mb-4">💬 Virtual Chat</h2>
+      <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 h-64 overflow-y-auto mb-4" id="chat-box">
+        <!-- Messages will appear here -->
+        <div class="text-center text-gray-400 py-8">Start your virtual night hangout chat...</div>
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="chat-input" placeholder="Type a message..."
+          class="flex-grow px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <button id="send-chat-btn" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+          Send
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 text-blue-200 z-10 relative">
+    <p>Made with ♥ for our virtual night adventures</p>
+  </footer>
+
+  <!-- Modal for Night Market -->
+  <div id="market-modal" class="modal">
+    <div class="modal-content">
+      <h3 id="modal-title" class="text-2xl font-bold text-white mb-4"></h3>
+      <p id="modal-message" class="text-xl text-white mb-6"></p>
+      <button id="close-modal" class="px-6 py-2 bg-white text-purple-700 rounded-full font-medium">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Create stars
+    document.addEventListener('DOMContentLoaded', function () {
+      const starsContainer = document.getElementById('stars');
+      const starCount = 200;
+
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+
+        // Random size between 1-3px
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+
+        // Random animation duration
+        const duration = Math.random() * 5 + 3;
+        star.style.setProperty('--duration', `${duration}s`);
+
+        starsContainer.appendChild(star);
+      }
+
+      // Night drive messages
+      const messages = [
+        "Hey! Wish you were here for this drive.",
+        "The city lights look amazing tonight.",
+        "I'd drive anywhere if it meant hanging out with you.",
+        "Next time we meet, let's take a real night drive!",
+        "The stars are beautiful tonight, just like you.",
+        "This song reminds me of you.",
+        "Can't wait for our next adventure together."
+      ];
+
+      const messageContainer = document.getElementById('message-container');
+      const sendMessageBtn = document.getElementById('send-message-btn');
+
+      sendMessageBtn.addEventListener('click', function () {
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        showMessage(randomMessage);
+      });
+
+      function showMessage(text) {
+        const message = document.createElement('div');
+        message.classList.add('message-bubble', 'absolute', 'left-1/2', 'transform', '-translate-x-1/2',
+          'bg-purple-600', 'text-white', 'px-4', 'py-2', 'rounded-full',
+          'whitespace-nowrap', 'shadow-lg');
+        message.textContent = text;
+        message.style.bottom = '120px';
+
+        messageContainer.appendChild(message);
+
+        // Remove message after animation completes
+        setTimeout(() => {
+          message.remove();
+        }, 6000);
+      }
+
+      // Auto-show some messages
+      let autoMessageCount = 0;
+      const autoMessageInterval = setInterval(() => {
+        if (autoMessageCount < 3) {
+          showMessage(messages[autoMessageCount]);
+          autoMessageCount++;
+        } else {
+          clearInterval(autoMessageInterval);
+        }
+      }, 3000);
+
+      // Chat functionality
+      const chatBox = document.getElementById('chat-box');
+      const chatInput = document.getElementById('chat-input');
+      const sendChatBtn = document.getElementById('send-chat-btn');
+
+      sendChatBtn.addEventListener('click', sendChatMessage);
+      chatInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          sendChatMessage();
+        }
+      });
+
+      function sendChatMessage() {
+        const message = chatInput.value.trim();
+        if (message) {
+          addChatMessage('You', message, true);
+          chatInput.value = '';
+
+          // Simulate reply after a delay
+          setTimeout(() => {
+            const replies = [
+              "That sounds amazing!",
+              "I wish I was there with you right now.",
+              "Haha, remember when we...",
+              "You always know how to make me smile.",
+              "I was just thinking about that too!",
+              "Can't wait for our next real hangout.",
+              "You're the best virtual hangout buddy."
+            ];
+            const randomReply = replies[Math.floor(Math.random() * replies.length)];
+            addChatMessage('Friend', randomReply, false);
+          }, 1000 + Math.random() * 2000);
+        }
+      }
+
+      function addChatMessage(sender, text, isUser) {
+        if (chatBox.children.length === 1 && chatBox.children[0].classList.contains('text-center')) {
+          chatBox.innerHTML = '';
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('mb-3', 'flex', isUser ? 'justify-end' : 'justify-start');
+
+        const bubble = document.createElement('div');
+        bubble.classList.add('max-w-xs', 'px-4', 'py-2', 'rounded-lg',
+          isUser ? 'bg-purple-600' : 'bg-gray-700');
+        bubble.textContent = text;
+
+        messageDiv.appendChild(bubble);
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      // Night Market Modal
+      const modal = document.getElementById('market-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const closeModal = document.getElementById('close-modal');
+      const stallItems = document.querySelectorAll('.stall-item');
+
+      stallItems.forEach(item => {
+        item.addEventListener('click', function () {
+          const itemName = this.querySelector('span').textContent;
+          const message = this.getAttribute('data-message');
+
+          modalTitle.textContent = itemName;
+          modalMessage.textContent = message;
+          modal.style.display = 'flex';
+        });
+      });
+
+      closeModal.addEventListener('click', function () {
+        modal.style.display = 'none';
+      });
+
+      // Beach sand writing
+      const writeSandBtn = document.getElementById('write-sand-btn');
+      const sandMessage = document.getElementById('sand-message');
+      const sandMessages = [
+        "Best Friends Forever",
+        "Distance can't separate us",
+        "Till our next adventure",
+        "Memories that last",
+        "You're my favorite person",
+        "Virtual hangouts are better with you"
+      ];
+
+      writeSandBtn.addEventListener('click', function () {
+        const randomMessage = sandMessages[Math.floor(Math.random() * sandMessages.length)];
+        sandMessage.textContent = randomMessage;
+        sandMessage.style.opacity = '1';
+
+        setTimeout(() => {
+          sandMessage.style.opacity = '0';
+        }, 5000);
+      });
+
+      // Play subtle night sounds
+      const nightSounds = [
+        { name: 'crickets', volume: 0.3 },
+        { name: 'distant-traffic', volume: 0.2 },
+        { name: 'wind', volume: 0.1 },
+        { name: 'ocean-waves', volume: 0.3 }
+      ];
+
+      nightSounds.forEach(sound => {
+        const audio = new Audio(`https://assets.mixkit.co/sfx/preview/${sound.name}.mp3`);
+        audio.volume = sound.volume;
+        audio.loop = true;
+        // audio.play(); // Uncomment to enable sounds (may be annoying with multiple tabs)
+      });
+    });
+  </script>
+</body>
+
+</html>
